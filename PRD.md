@@ -5,7 +5,7 @@
 **AI Docs Assistant** is a full-stack web application designed to transform how users learn from static documents. By leveraging **Google GenAI**, the platform allows users to upload PDF documents and automatically generate interactive study tools.
 
 - **Core Goal:** Shift the user experience from passive reading to active, measurable learning.
-- **Key Outcome:** Transformation of static PDFs into summaries, flashcards, quizzes, and a contextual conversational AI.
+- **Key Outcome:** Transformation of static PDFs into summaries, chapter breakdowns, flashcards, quizzes, and a contextual conversational AI.
 
 ---
 
@@ -13,7 +13,10 @@
 
 - **Secure User Workspace:** Personalized dashboard to manage documents and track learning progress.
 - **Automated Document Ingestion:** Seamless PDF upload with automatic text extraction.
-- **AI-Powered Study Tools:** On-demand generation of document summaries, flashcards, and interactive quizzes.
+- **AI-Powered Study Tools:** - **General Summarization:** High-level overview of document content.
+  - **Chapter-by-Chapter Summary:** AI-driven structural breakdown of long-form texts/books into readable chapters (on-demand, non-stored).
+  - **Flashcard Generation:** Automated creation of study cards.
+  - **Quiz Generation:** Interactive assessment tools.
 - **Contextual AI Chat:** Document-specific chat interface to ask questions grounded in the text.
 - **Learning Tracking:** Interactive quiz-taking interfaces and progress analytics to monitor knowledge retention.
 
@@ -41,6 +44,7 @@
 Triggered via `AIActions.jsx` within the document detailed view:
 
 - **Summarization:** Generate a concise summary of the document's content.
+- **Chapter Summary:** Intelligently identify chapter breaks and generate a structured breakdown (Title, Summary, Key Takeaways). This data is displayed in the UI but **not stored** in the database.
 - **Flashcard Generation:** Automatically create front/back cards from key concepts.
 - **Quiz Generation:** Generate multiple-choice or short-answer questions.
 - **Contextual Chat:** Interface (`ChatInterface.jsx`) for Q&A grounded in the document's extracted text.
@@ -49,8 +53,7 @@ Triggered via `AIActions.jsx` within the document detailed view:
 
 - **Flashcard Management:** View, edit, and review cards at `/flashcards` or `/documents/:id/flashcards`.
 - **Quiz Execution:** Dedicated interface for taking quizzes at `/quizzes/:quizId`.
-- **Results & Analytics:** \* Review scores and correct/incorrect answers at `/quizzes/:quizId/results`.
-  - Global progress overview available on the `/dashboard`.
+- **Results & Analytics:** Review scores and correct/incorrect answers at `/quizzes/:quizId/results`. Global progress overview available on the `/dashboard`.
 
 ---
 

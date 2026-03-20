@@ -109,23 +109,24 @@ ai-docs-assistant/
 
 ### Technology Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Runtime | Node.js | JavaScript runtime |
-| Framework | Express.js 5.1.0 | Web server |
-| Database | MongoDB with Mongoose 8.20.0 | Data persistence |
-| Auth | JWT (jsonwebtoken 9.0.2) | Stateless authentication |
-| Password | bcryptjs 3.0.3 | Password hashing |
-| File Upload | Multer 2.0.2 | PDF file handling |
-| PDF Processing | pdf-parse 2.4.5 | Text extraction |
-| AI Integration | @google/genai 1.30.0 | Generative AI features |
-| Validation | express-validator 7.3.1 | Request validation |
+| Component      | Technology                   | Purpose                  |
+| -------------- | ---------------------------- | ------------------------ |
+| Runtime        | Node.js                      | JavaScript runtime       |
+| Framework      | Express.js 5.1.0             | Web server               |
+| Database       | MongoDB with Mongoose 8.20.0 | Data persistence         |
+| Auth           | JWT (jsonwebtoken 9.0.2)     | Stateless authentication |
+| Password       | bcryptjs 3.0.3               | Password hashing         |
+| File Upload    | Multer 2.0.2                 | PDF file handling        |
+| PDF Processing | pdf-parse 2.4.5              | Text extraction          |
+| AI Integration | @google/genai 1.30.0         | Generative AI features   |
+| Validation     | express-validator 7.3.1      | Request validation       |
 
 ### Server Entry Point
 
 **File:** `backend/server.js`
 
 **Key responsibilities:**
+
 1. Load environment variables from `.env`
 2. Initialize Express application
 3. Configure middleware (CORS, body parsing, static files)
@@ -135,6 +136,7 @@ ai-docs-assistant/
 7. Start HTTP server on port 8000
 
 **Middleware stack:**
+
 ```
 Request → CORS → Body Parser → API Routes → Error Handler → Response
 ```
@@ -153,6 +155,7 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 ```
 
 **JWT Structure:**
+
 ```javascript
 {
   userId: ObjectId,
@@ -165,6 +168,7 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 ### Database Models
 
 #### User Model
+
 **File:** `backend/models/User.js`
 
 ```javascript
@@ -179,9 +183,11 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 ```
 
 **Methods:**
+
 - `matchPassword(enteredPassword)`: Compare plaintext with hashed password
 
 #### Document Model
+
 **File:** `backend/models/Document.js`
 
 ```javascript
@@ -199,12 +205,15 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 ```
 
 **Virtuals:**
+
 - `progress`: Calculated from related flashcards and quizzes
 
 **Pre-save hooks:**
+
 - Auto-set `uploadedBy` to authenticated user
 
 #### Flashcard Model
+
 **File:** `backend/models/Flashcard.js`
 
 ```javascript
@@ -218,6 +227,7 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 ```
 
 #### Quiz Model
+
 **File:** `backend/models/Quiz.js`
 
 ```javascript
@@ -234,6 +244,7 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 ```
 
 #### QuizResult Model
+
 **File:** `backend/models/QuizResult.js`
 
 ```javascript
@@ -252,52 +263,59 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 ### API Endpoints
 
 #### Authentication (`/api/auth`)
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/register` | Create new account | No |
-| POST | `/login` | Authenticate user | No |
-| GET | `/profile` | Get user profile | Yes |
-| PUT | `/profile` | Update user profile | Yes |
+
+| Method | Endpoint    | Description         | Auth Required |
+| ------ | ----------- | ------------------- | ------------- |
+| POST   | `/register` | Create new account  | No            |
+| POST   | `/login`    | Authenticate user   | No            |
+| GET    | `/profile`  | Get user profile    | Yes           |
+| PUT    | `/profile`  | Update user profile | Yes           |
 
 #### Documents (`/api/documents`)
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| GET | `/` | List all user's documents | Yes |
-| POST | `/upload` | Upload new PDF document | Yes |
-| GET | `/:id` | Get document details | Yes |
-| PUT | `/:id` | Update document metadata | Yes |
-| DELETE | `/:id` | Delete document | Yes |
+
+| Method | Endpoint  | Description               | Auth Required |
+| ------ | --------- | ------------------------- | ------------- |
+| GET    | `/`       | List all user's documents | Yes           |
+| POST   | `/upload` | Upload new PDF document   | Yes           |
+| GET    | `/:id`    | Get document details      | Yes           |
+| PUT    | `/:id`    | Update document metadata  | Yes           |
+| DELETE | `/:id`    | Delete document           | Yes           |
 
 #### AI Features (`/api/ai`)
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/summarize` | Generate summary | Yes |
-| POST | `/generate-flashcards` | Create flashcards | Yes |
-| POST | `/generate-quiz` | Create quiz | Yes |
-| POST | `/chat` | Ask question about document | Yes |
+
+| Method | Endpoint               | Description                 | Auth Required |
+| ------ | ---------------------- | --------------------------- | ------------- |
+| POST   | `/summarize`           | Generate summary            | Yes           |
+| POST   | `/summarize-chapters`  | Generate summary by chapter | Yes           |
+| POST   | `/generate-flashcards` | Create flashcards           | Yes           |
+| POST   | `/generate-quiz`       | Create quiz                 | Yes           |
+| POST   | `/chat`                | Ask question about document | Yes           |
 
 #### Flashcards (`/api/flashcards`)
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| GET | `/` | List user's flashcards | Yes |
-| GET | `/:id` | Get flashcard details | Yes |
-| POST | `/` | Create flashcard | Yes |
-| PUT | `/:id` | Update flashcard | Yes |
-| DELETE | `/:id` | Delete flashcard | Yes |
+
+| Method | Endpoint | Description            | Auth Required |
+| ------ | -------- | ---------------------- | ------------- |
+| GET    | `/`      | List user's flashcards | Yes           |
+| GET    | `/:id`   | Get flashcard details  | Yes           |
+| POST   | `/`      | Create flashcard       | Yes           |
+| PUT    | `/:id`   | Update flashcard       | Yes           |
+| DELETE | `/:id`   | Delete flashcard       | Yes           |
 
 #### Quizzes (`/api/quizzes`)
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| GET | `/` | List user's quizzes | Yes |
-| GET | `/:id` | Get quiz details | Yes |
-| POST | `/` | Create quiz | Yes |
-| POST | `/:id/take` | Submit quiz answers | Yes |
-| GET | `/:id/results` | Get quiz results | Yes |
+
+| Method | Endpoint       | Description         | Auth Required |
+| ------ | -------------- | ------------------- | ------------- |
+| GET    | `/`            | List user's quizzes | Yes           |
+| GET    | `/:id`         | Get quiz details    | Yes           |
+| POST   | `/`            | Create quiz         | Yes           |
+| POST   | `/:id/take`    | Submit quiz answers | Yes           |
+| GET    | `/:id/results` | Get quiz results    | Yes           |
 
 #### Progress (`/api/progress`)
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| GET | `/` | Get user's learning analytics | Yes |
+
+| Method | Endpoint | Description                   | Auth Required |
+| ------ | -------- | ----------------------------- | ------------- |
+| GET    | `/`      | Get user's learning analytics | Yes           |
 
 ---
 
@@ -305,23 +323,24 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 
 ### Technology Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Framework | React 19.2.0 | UI library |
-| Build Tool | Vite 7.2.4 | Bundler & dev server |
-| Router | React Router 7.9.6 | Client-side routing |
-| Styling | TailwindCSS 4.1.17 | Utility-first CSS |
-| HTTP Client | Axios 1.13.2 | API communication |
-| Notifications | React Hot Toast 2.6.0 | Toast messages |
-| Icons | Lucide React 0.554.0 | Icon components |
-| Markdown | React Markdown 10.1.0 | Render markdown content |
-| Syntax Highlighting | React Syntax Highlighter 16.1.0 | Code blocks |
+| Component           | Technology                      | Purpose                 |
+| ------------------- | ------------------------------- | ----------------------- |
+| Framework           | React 19.2.0                    | UI library              |
+| Build Tool          | Vite 7.2.4                      | Bundler & dev server    |
+| Router              | React Router 7.9.6              | Client-side routing     |
+| Styling             | TailwindCSS 4.1.17              | Utility-first CSS       |
+| HTTP Client         | Axios 1.13.2                    | API communication       |
+| Notifications       | React Hot Toast 2.6.0           | Toast messages          |
+| Icons               | Lucide React 0.554.0            | Icon components         |
+| Markdown            | React Markdown 10.1.0           | Render markdown content |
+| Syntax Highlighting | React Syntax Highlighter 16.1.0 | Code blocks             |
 
 ### Router Configuration
 
 **File:** `frontend/src/App.jsx`
 
 **Protected Routes** (require authentication):
+
 - `/dashboard` - Overview with learning progress
 - `/documents` - Document list and upload
 - `/documents/:id` - Document detail page
@@ -332,6 +351,7 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 - `/profile` - User profile management
 
 **Public Routes:**
+
 - `/login` - Login page
 - `/register` - Registration page
 - `/` - Redirect to `/dashboard` or `/login`
@@ -339,9 +359,11 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 ### State Management
 
 #### AuthContext
+
 **File:** `frontend/src/context/AuthContext.jsx`
 
 **State:**
+
 ```javascript
 {
   user: Object | null,
@@ -355,6 +377,7 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 ```
 
 **Persistence:**
+
 - Token and user data stored in `localStorage`
 - Automatically restored on page reload
 - `checkAuthStatus()` validates token on startup
@@ -364,6 +387,7 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 **File:** `frontend/src/utils/axiosInstance.js`
 
 **Axios Instance Configuration:**
+
 ```javascript
 {
   baseURL: 'http://localhost:8000',
@@ -373,12 +397,14 @@ Request → CORS → Body Parser → API Routes → Error Handler → Response
 ```
 
 **Request Interceptor:**
+
 ```javascript
 // Automatically attach JWT token
-axiosInstance.config.headers.Authorization = `Bearer ${token}`;
+axiosInstance.config.headers.Authorization = `Bearer ${token}`
 ```
 
 **Response Interceptor:**
+
 ```javascript
 // Handle errors globally
 // - 401: Redirect to login
@@ -386,6 +412,7 @@ axiosInstance.config.headers.Authorization = `Bearer ${token}`;
 ```
 
 **Service Pattern:**
+
 ```
 API Paths (apiPaths.js) → Service Functions → Axios Instance
 ```
@@ -395,11 +422,13 @@ API Paths (apiPaths.js) → Service Functions → Axios Instance
 #### Layout Components
 
 **AppLayout** (`frontend/src/components/layout/AppLayout.jsx`)
+
 - Wrapper for protected routes
 - Contains Header component
 - Provides consistent spacing and structure
 
 **Header** (`frontend/src/components/layout/Header.jsx`)
+
 - App branding/logo
 - Navigation links
 - User dropdown menu
@@ -408,30 +437,35 @@ API Paths (apiPaths.js) → Service Functions → Axios Instance
 #### Feature Components
 
 **AIActions** (`frontend/src/components/ai/AIActions.jsx`)
+
 - Buttons for AI features on document detail page
-- Actions: Summarize, Generate Flashcards, Generate Quiz, Chat
+- Actions: Summarize, Chapter Summary (Structural), Generate Flashcards, Generate Quiz, Chat
 - Loading states with toast notifications
 - Progress tracking
 
 **ChatInterface** (`frontend/src/components/chat/ChatInterface.jsx`)
+
 - Chat UI for document-specific questions
 - Message history
 - Streaming responses
 - Context-aware responses based on document content
 
 **DocumentCard** (`frontend/src/components/documents/DocumentCard.jsx`)
+
 - List item for documents
 - Title, upload date, file size
 - Actions: View, Edit, Delete
 - Link to detail page
 
 **FlashcardManager** (`frontend/src/components/flashcards/FlashcardManager.jsx`)
+
 - Review controls for flashcards
 - Shuffle, flip, next/previous navigation
 - Progress indicators
 - Add new card functionality
 
 **QuizManager** (`frontend/src/components/quizzes/QuizManager.jsx`)
+
 - Quiz taking interface
 - Question navigation
 - Answer selection
@@ -444,23 +478,25 @@ API Paths (apiPaths.js) → Service Functions → Axios Instance
 
 ```javascript
 function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth()
 
-  if (loading) return <Spinner />;
-  if (!isAuthenticated) return <Navigate to="/login" />;
+  if (loading) return <Spinner />
+  if (!isAuthenticated) return <Navigate to='/login' />
 
-  return children;
+  return children
 }
 ```
 
 ### Utility Components
 
 **MarkdownRenderer** (`frontend/src/components/common/MarkdownRenderer.jsx`)
+
 - Renders markdown content from documents
 - Syntax highlighting for code blocks
 - GFM support (tables, strikethrough, task lists)
 
 **Modal** (`frontend/src/components/common/Modal.jsx`)
+
 - Reusable modal dialog
 - Overlay backdrop
 - Close on escape/overlay click
@@ -475,10 +511,11 @@ function ProtectedRoute({ children }) {
 **Library:** `@google/genai`
 
 **Configuration:**
-```javascript
-import { GoogleGenAI } from '@google/genai';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
+```javascript
+import { GoogleGenAI } from '@google/genai'
+
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY })
 ```
 
 ### Document Chat Flow
@@ -492,6 +529,7 @@ Stream response → Store in chat history → Return to frontend
 ```
 
 **System Prompt Example:**
+
 ```
 You are a helpful AI assistant that answers questions based on the following document:
 
@@ -499,6 +537,20 @@ You are a helpful AI assistant that answers questions based on the following doc
 
 Answer questions only using the information from this document.
 If the answer is not in the document, say you don't have enough information.
+```
+
+### Chapter-by-Chapter Summarization Flow
+
+**Implementation:** `backend/controllers/aiController.js`
+
+```
+Trigger: New "Chapter Summary" button in AIActions side panel →
+Backend retrieves document text →
+AI identifies structural breaks and identifies chapters →
+Generate Markdown-formatted structured breakdown →
+Persistence: None (Result is ephemeral and not saved to database) →
+Frontend stores response in modalContent state →
+UI Pattern: Display immediately via shared Modal and MarkdownRenderer
 ```
 
 ### Flashcard Generation Flow
@@ -516,6 +568,7 @@ Return created flashcards
 ```
 
 **Prompt Structure:**
+
 ```
 Generate {count} flashcards from this document about key concepts.
 Format as JSON array:
@@ -544,6 +597,7 @@ Return quiz details
 ```
 
 **Quiz Prompt Structure:**
+
 ```
 Generate {count} multiple-choice questions from this document.
 Format as JSON array:
@@ -576,6 +630,7 @@ Document: {text}
 ```
 
 **Upload Configuration** (`backend/config/multer.js`):
+
 ```javascript
 {
   dest: './uploads/',
@@ -585,13 +640,14 @@ Document: {text}
 ```
 
 **PDF Parsing** (`backend/utils/pdfParser.js`):
+
 ```javascript
-import pdfParse from 'pdf-parse';
+import pdfParse from 'pdf-parse'
 
 async function parsePDF(filePath) {
-  const dataBuffer = fs.readFileSync(filePath);
-  const data = await pdfParse(dataBuffer);
-  return data.text; // Extracted plain text
+  const dataBuffer = fs.readFileSync(filePath)
+  const data = await pdfParse(dataBuffer)
+  return data.text // Extracted plain text
 }
 ```
 
@@ -600,23 +656,27 @@ async function parsePDF(filePath) {
 ## Security Considerations
 
 ### Authentication Security
+
 - Passwords hashed with bcrypt (10 rounds)
 - JWT expiration configured (7 days)
 - Token verified on every protected request
 - Password not returned in API responses
 
 ### Authorization
+
 - User ownership validation on all operations
 - Middleware ensures requestor owns resource
 - No cross-user data access
 
 ### Input Validation
+
 - express-validator on all POST/PUT endpoints
 - Email format validation
 - Username length constraints
 - File type validation for uploads
 
 ### API Security
+
 - CORS configured for frontend origin
 - Rate limiting recommended for production
 - Environment variables for secrets
@@ -627,23 +687,27 @@ async function parsePDF(filePath) {
 ## Development Patterns
 
 ### Monorepo Structure
+
 - Independent `package.json` for frontend and backend
 - Shared configuration via `bun` (recommended)
 - Separate dev servers: 5173 (frontend), 8000 (backend)
 
 ### Code Organization
+
 - Feature-based routing (React Router v7)
 - Service layer for API calls
 - Reusable component library
 - Centralized constants (API paths)
 
 ### Error Handling
+
 - Try/catch in controllers
 - Centralized error middleware
 - Consistent error response format
 - Toast notifications for client errors
 
 ### Styling Approach
+
 - TailwindCSS v4 utility classes
 - Dark mode support via `dark:` variants
 - Responsive design with breakpoints
@@ -656,6 +720,7 @@ async function parsePDF(filePath) {
 ### Environment Variables
 
 **Backend (.env):**
+
 ```env
 NODE_ENV=production|development
 PORT=8000
@@ -667,6 +732,7 @@ UPLOAD_DIR=./uploads
 ```
 
 **Frontend (.env or runtime):**
+
 ```env
 VITE_API_BASE_URL=http://localhost:8000
 ```
@@ -674,18 +740,21 @@ VITE_API_BASE_URL=http://localhost:8000
 ### Build Process
 
 **Frontend:**
+
 ```bash
 bun run build  # Produces dist/ directory
 bun run preview  # Preview production build
 ```
 
 **Backend:**
+
 ```bash
 bun run start  # Production startup
 bun run dev    # Development with nodemon
 ```
 
 ### Production Requirements
+
 - Use production MongoDB instance
 - Set `NODE_ENV=production`
 - Use reverse proxy (Nginx/Apache) for static files
@@ -700,18 +769,21 @@ bun run dev    # Development with nodemon
 ## Performance Optimizations
 
 ### Frontend
+
 - Lazy loading of route components
 - Code splitting with React.lazy
 - Image optimization via Vite
 - Bundle analysis ready
 
 ### Backend
+
 - PDF parsing async/await
 - Database indexes on user references
 - Pagination for large lists (not implemented)
 - Caching strategies for AI responses (not implemented)
 
 ### Database
+
 - Mongoose lean queries for read-heavy operations
 - Population for references
 - Proper indexing on foreign keys
@@ -721,6 +793,7 @@ bun run dev    # Development with nodemon
 ## API Response Format
 
 ### Success Response
+
 ```json
 {
   "success": true,
@@ -729,6 +802,7 @@ bun run dev    # Development with nodemon
 ```
 
 ### Error Response
+
 ```json
 {
   "success": false,
@@ -737,6 +811,7 @@ bun run dev    # Development with nodemon
 ```
 
 ### Common Status Codes
+
 - `200`: Success
 - `201`: Created
 - `400`: Bad Request
@@ -750,11 +825,13 @@ bun run dev    # Development with nodemon
 ## File Upload Storage
 
 ### Local Storage
+
 - Directory: `backend/uploads/`
 - Storage: Physical PDF files
 - Reference: Stored in Document model
 
 ### File Lifecycle
+
 1. Upload → File stored, content extracted
 2. Document updated → Content stored in DB
 3. Delete document → File removed from disk
@@ -764,6 +841,7 @@ bun run dev    # Development with nodemon
 ## Testing Strategy
 
 ### Manual Testing
+
 - Authentication flow
 - Document upload and processing
 - AI feature generation
@@ -771,6 +849,7 @@ bun run dev    # Development with nodemon
 - Flashcard review
 
 ### Recommended Tests
+
 - Unit tests for utility functions
 - Integration tests for API endpoints
 - E2E tests for critical user flows
@@ -781,6 +860,7 @@ bun run dev    # Development with nodemon
 ## Future Enhancements
 
 ### Planned Features
+
 - Email verification
 - Password reset flow
 - Document sharing
@@ -794,6 +874,7 @@ bun run dev    # Development with nodemon
 - Import from URL
 
 ### Technical Improvements
+
 - WebSocket for chat streaming
 - Search and filtering
 - Document versioning

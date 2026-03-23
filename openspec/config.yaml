@@ -1,20 +1,84 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Project context
+context: |
+  Project: AI Docs Assistant
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Description:
+  Full-stack web app that transforms PDF documents into interactive learning tools
+  using Google GenAI (summaries, flashcards, quizzes, chat).
+
+  Tech stack:
+  - Frontend: React 19, Vite 7, React Router v7, TailwindCSS v4
+  - Backend: Node.js, Express.js
+  - Database: MongoDB (Mongoose)
+  - AI: @google/genai
+  - Auth: JWT + bcrypt
+  - File handling: multer + pdf-parse
+  - Package manager: bun
+
+  Architecture:
+  - Monorepo (frontend/ + backend/)
+  - REST API structure
+  - MVC pattern on backend
+  - Service layer on frontend
+
+  Key concepts:
+  - Document-based learning (PDF → AI outputs)
+  - Ephemeral AI results (chapter summaries not stored)
+  - User-isolated data (multi-tenant system)
+
+  Conventions:
+  - Use functional React components
+  - Use async/await (no callbacks)
+  - Keep components small and reusable
+  - API responses follow: { success, data | error }
+  - Use descriptive naming (no abbreviations)
+
+# Per-artifact rules
+rules:
+  proposal:
+    - Keep under 500 words
+    - Include: Objective, Approach, Tradeoffs
+    - Avoid unnecessary technical jargon
+
+  tasks:
+    - Break into small tasks (max 2 hours each)
+    - Group by feature (auth, documents, AI, etc.)
+    - Include clear acceptance criteria
+
+  code:
+    - Follow existing folder structure strictly
+    - Do not introduce new architecture patterns without justification
+    - Keep controllers thin, move logic to services/utils
+    - Always handle errors (try/catch)
+    - Validate all inputs (express-validator)
+
+  frontend:
+    - Use Tailwind only (no custom CSS unless necessary)
+    - Keep state minimal and localized
+    - Use service layer for API calls (no direct axios in components)
+    - Show loading + error states for all async actions
+
+  backend:
+    - Protect all routes with auth middleware unless public
+    - Enforce user ownership on all resources
+    - Keep responses consistent
+    - Do not store unnecessary AI-generated data
+
+  ai:
+    - Always return structured JSON when possible
+    - Keep prompts deterministic and clear
+    - Avoid storing temporary AI outputs (e.g. chapter summaries)
+    - Validate AI responses before saving
+
+  security:
+    - Never expose secrets
+    - Hash passwords with bcrypt
+    - Use JWT for all protected routes
+    - Validate file uploads (PDF only, size limits)
+
+  performance:
+    - Avoid blocking operations
+    - Use async processing for PDF + AI tasks
+    - Add loading states in UI for long operations

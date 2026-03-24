@@ -55,6 +55,15 @@ const getChatHistory = async (documentId) => {
   }
 };
 
+const generateChapterSummaries = async (documentId) => {
+  try {
+    const response = await axiosInstance.post(API_PATHS.AI.GENERATE_CHAPTERS.replace(':documentId', documentId), {});
+    return response.data?.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to generate chapter summaries' };
+  }
+};
+
 
 const aiService = {
   generateFlashcards,
@@ -63,6 +72,7 @@ const aiService = {
   chat,
   explainConcept,
   getChatHistory,
+  generateChapterSummaries,
 };
 
 export default aiService;

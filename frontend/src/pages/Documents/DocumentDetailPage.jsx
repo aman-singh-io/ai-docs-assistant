@@ -92,7 +92,9 @@ const DocumentDetailPage = () => {
   };
 
   const renderAIActions = () => {
-    return <AIActions />
+    // Calculate document text length from the document data
+    const textLength = document?.data?.extractedText?.length || 0;
+    return <AIActions documentTextLength={textLength} />
   };
 
   const renderFlashcardsTab = () => {

@@ -39,12 +39,19 @@
       "mcp__playwright__browser_fill_form",
       "mcp__playwright__browser_snapshot",
       "mcp__playwright__browser_wait_for",
-      "mcp__playwright__browser_run_code"
+      "mcp__playwright__browser_run_code",
+      "Bash(openspec instructions:*)",
+      "Bash(openspec status:*)",
+      "Bash(openspec list:*)",
+      "Bash(npx:*)",
+      "mcp__playwright__browser_console_messages",
+      "Bash(node -e \":*)"
     ],
     "deny": []
   },
   "enabledPlugins": {
     "comprehensive-review@claude-code-workflows": true,
-    "code-documentation@claude-code-workflows": false
+    "code-documentation@claude-code-workflows": false,
+    "debugging-toolkit@claude-code-workflows": true
   }
 }

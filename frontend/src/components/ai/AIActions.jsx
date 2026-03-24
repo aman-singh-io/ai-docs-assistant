@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Sparkles, BookOpen, Lightbulb } from "lucide-react";
+import { Sparkles, BookOpen, Lightbulb, FileText } from "lucide-react";
 import aiService from "../../services/aiService";
 import toast from "react-hot-toast";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import Modal from "../common/Modal";
+import ChapterSummaryView from "../chapters/ChapterSummaryView";
 
-const AIActions = () => {
+const AIActions = ({ documentTextLength = 0 }) => {
 
   const { id: documentId } = useParams();
   const [loadingAction, setLoadingAction] = useState(null);
@@ -14,6 +15,9 @@ const AIActions = () => {
   const [modalContent, setModalContent] = useState("");
   const [modalTitle, setModalTitle] = useState("");
   const [concept, setConcept] = useState("");
+  const [chapterLoading, setChapterLoading] = useState(false);
+  const [chapterData, setChapterData] = useState(null);
+  const [showChapters, setShowChapters] = useState(false);
 
   const handleGenerateSummary = async () => {
     setLoadingAction("summary");
@@ -44,11 +48,31 @@ const AIActions = () => {
       setModalTitle(`Explanation of "${concept}"`);
       setModalContent(explanation);
       setIsModalOpen(true);
-      setConcept(""); 
+      setConcept("");
     } catch (error) {
       toast.error("Failed to explain concept.");
     } finally {
       setLoadingAction(null);
+    }
+  };
+
+  const handleGenerateChapters = async () => {
+    setChapterLoading(true);
+    try {
+      const data = await aiService.generateChapterSummaries(documentId);
+      setChapterData(data.chapters);
+      setShowChapters(true);
+      toast.success('Chapter summaries generated successfully!');
+    } catch (error) {
+      if (error.statusCode === 422) {
+        setDocumentTextLength(0); // Trigger disabled state
+        toast.error('Document too short for chapter generation (min 10k chars)');
+      } else {
+        toast.error('Failed to generate chapter summaries.');
+      }
+      setChapterData(null);
+    } finally {
+      setChapterLoading(false);
     }
   };
 
@@ -58,7 +82,7 @@ const AIActions = () => {
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-200/60 bg-linear-to-br from-slate-50/50 to-white/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-purple-500/25 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25 flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" strokeWidth={2} />
             </div>
             <div>
@@ -71,6 +95,43 @@ const AIActions = () => {
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Chapter Summary */}
+          <div className="group p-5 bg-linear-to-br from-slate-50/50 to-white rounded-xl border border-slate-200/60 hover:border-emerald-300/60 hover:shadow-md transition-all duration-200">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-linear-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
+                    <FileText
+                      className="w-4 h-4 text-emerald-600"
+                      strokeWidth={2}
+                    />
+                  </div>
+                  <h4 className="font-semibold text-slate-900">
+                    Chapter Summary
+                  </h4>
+                </div>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Get an AI-detected chapter breakdown with summaries and key takeaways.
+                </p>
+              </div>
+              <button
+                onClick={handleGenerateChapters}
+                disabled={chapterLoading || documentTextLength < 10000}
+                className="shrink-0 h-10 px-5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                aria-label="Generate chapter summary"
+              >
+                {chapterLoading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Generating...
+                  </span>
+                ) : (
+                  "Generate"
+                )}
+              </button>
+            </div>
+          </div>
+
           {/* Generate Summary */}
           <div className="group p-5 bg-linear-to-br from-slate-50/50 to-white rounded-xl border border-slate-200/60 hover:border-slate-300/60 hover:shadow-md transition-all duration-200">
             <div className="flex items-start justify-between gap-4">
@@ -154,6 +215,17 @@ const AIActions = () => {
 
         </div>
       </div>
+
+      {/* Chapter Summary View */}
+      {showChapters && chapterData && (
+        <ChapterSummaryView
+          documentId={documentId}
+          chapters={chapterData}
+          isGenerating={chapterLoading}
+          onGenerate={handleGenerateChapters}
+          disabled={documentTextLength < 10000}
+        />
+      )}
 
       {/* Result Modal */}
       <Modal

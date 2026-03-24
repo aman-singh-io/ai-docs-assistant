@@ -1,44 +1,44 @@
 ## 1. Backend - New AI Endpoint
 
-- [ ] 1.1 Create POST /api/ai/summarize-chapters/:documentId endpoint in AI routes
-- [ ] 1.2 Add authentication middleware requirement to chapter endpoint
-- [ ] 1.3 Implement document ownership validation (user owns the document)
-- [ ] 1.4 Create document text extraction helper for chapter detection
-- [ ] 1.5 Add chapter detection prompt template to AI service
-- [ ] 1.6 Implement chapter response validation logic
+- [x] 1.1 Create POST /api/ai/summarize-chapters/:documentId endpoint in AI routes
+- [x] 1.2 Add authentication middleware requirement to chapter endpoint
+- [x] 1.3 Implement document ownership validation (user owns the document)
+- [x] 1.4 Create document text extraction helper for chapter detection
+- [x] 1.5 Add chapter detection prompt template to AI service
+- [x] 1.6 Implement chapter response validation logic
 - [ ] 1.7 Add rate limiting to chapter endpoint (10/hr per user per document)
-- [ ] 1.8 Add error handling for timeout (>120s) and document too short (<10k chars)
+- [x] 1.8 Add error handling for timeout (>120s) and document too short (<10k chars)
 
 ## 2. Frontend - New Components
 
-- [ ] 2.1 Create ChapterSummaryView.jsx component
-- [ ] 2.2 Implement collapsible chapter list with accordion UI
-- [ ] 2.3 Add loading spinner state management
-- [ ] 2.4 Add error state handling with retry button
-- [ ] 2.5 Implement "Regenerate" button for refreshing chapters
+- [x] 2.1 Create ChapterSummaryView.jsx component
+- [x] 2.2 Implement collapsible chapter list with accordion UI
+- [x] 2.3 Add loading spinner state management
+- [x] 2.4 Add error state handling with retry button
+- [x] 2.5 Implement "Regenerate" button for refreshing chapters
 - [ ] 2.6 Create Chapter interface/type definitions (typescript)
-- [ ] 2.7 Add toasts for generation status (starting, completed, error)
-- [ ] 2.8 Implement keyboard navigation (tab to chapters, enter to expand)
-- [ ] 2.9 Add accessibility attributes (aria-labels, loading announcements)
+- [x] 2.7 Add toasts for generation status (starting, completed, error)
+- [x] 2.8 Implement keyboard navigation (tab to chapters, enter to expand)
+- [x] 2.9 Add accessibility attributes (aria-labels, loading announcements)
 
 ## 3. Frontend - Integration
 
-- [ ] 3.1 Update AIActions.jsx to include "Chapter Summary" button
-- [ ] 3.2 Add "Chapter Summary" to existing AI actions grid/menu
-- [ ] 3.3 Wire up onGenerateChapters() callback to trigger API call
-- [ ] 3.4 Integrate ChapterSummaryView into document detail view page
-- [ ] 3.5 Add state management for chapter data (React useState)
-- [ ] 3.6 Add route or conditional render for displaying chapter view
-- [ ] 3.7 Handle disabled state for documents too short (<10k chars)
-- [ ] 3.8 Test loading flow from button click to view display
+- [x] 3.1 Update AIActions.jsx to include "Chapter Summary" button
+- [x] 3.2 Add "Chapter Summary" to existing AI actions grid/menu
+- [x] 3.3 Wire up onGenerateChapters() callback to trigger API call
+- [x] 3.4 Integrate ChapterSummaryView into document detail view page (as conditional render in AIActions)
+- [x] 3.5 Add state management for chapter data (React useState)
+- [x] 3.6 Add route or conditional render for displaying chapter view
+- [x] 3.7 Handle disabled state for documents too short (<10k chars)
+- [ ] 3.8 Test loading flow from button click to view display (requires manual testing)
 
 ## 4. API Integration
 
-- [ ] 4.1 Create API call helper function for chapter generation
-- [ ] 4.2 Implement error response handling (404, 422, 500)
-- [ ] 4.3 Add network timeout handling for slow requests
-- [ ] 4.4 Implement client-side caching (in-memory) for same session
-- [ ] 4.5 Add retry logic with exponential backoff for failed requests
+- [x] 4.1 Create API call helper function for chapter generation
+- [x] 4.2 Implement error response handling (404, 422, 500)
+- [ ] 4.3 Add network timeout handling for slow requests (requires implementation)
+- [x] 4.4 Implement client-side caching (in-memory) for same session
+- [ ] 4.5 Add retry logic with exponential backoff for failed requests (future enhancement)
 
 ## 5. Testing
 

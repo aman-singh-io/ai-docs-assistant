@@ -1,7 +1,7 @@
 # Chapter Summary Generation
 
 **Version:** 1.0.0
-**Status:** proposed
+**Status:** implemented
 **Related Proposal:** `chapter-by-chapter-summary/proposal.md`
 
 ## Overview
@@ -14,11 +14,12 @@ AI-powered chapter boundary detection and structured summary generation for long
 
 - Identifies semantic chapter breaks in extracted document text
 - Handles various chapter formats (numbered, titled, unnumbered)
+- Uses intelligent chunking with overlap to maintain context between sections
 
 ### Generates structured chapter summaries
 
 - Produces chapter title
-- Produces chapter summary (2-4 sentences)
+- Produces chapter summary (2-3 sentences)
 - Produces key takeaways (3-5 bullet points)
 
 ### On-demand generation
@@ -46,7 +47,7 @@ AI-powered chapter boundary detection and structured summary generation for long
   "success": true,
   "data": {
     "documentId": "507f1f77bcf86cd799439011",
-    "totalChapters": 12,
+    "title": "Sample Document",
     "chapters": [
       {
         "chapterNumber": 1,
@@ -79,7 +80,7 @@ AI-powered chapter boundary detection and structured summary generation for long
 ```json
 {
   "success": false,
-  "error": "Document text too short to detect chapters"
+  "error": "Document text too short (minimum 10,000 characters required for chapter detection)"
 }
 ```
 
@@ -118,6 +119,8 @@ interface Chapter {
 - Error state with retry button
 - "Regenerate" button for current chapters
 - Toast notification when generation completes
+- Keyboard navigation support (tab to chapters, enter to expand)
+- Accessibility attributes (aria-labels, loading announcements)
 
 **User Flow:**
 
@@ -156,34 +159,37 @@ interface Chapter {
 - Clean whitespace, normalize line endings
 - Identify text length (>10,000 characters triggers chapter detection)
 
-**Step 2: AI Prompt for Chapter Detection**
+**Step 2: Intelligent Chunking with Overlap**
+
+- Text is split into chunks of 80,000 characters
+- 10,000 character overlap between chunks to maintain context
+- Chunking respects line breaks to avoid cutting sentences
+- Context is maintained between chunks to avoid missing chapter boundaries
+
+**Step 3: AI Prompt for Chapter Detection**
 
 ```
-Analyze this document text and identify chapter boundaries.
+Analyze the text following and identify the new chapters.
 
-Return a JSON array where each chapter has:
-- chapterNumber: integer starting from 1
-- title: chapter title (extracted or generated)
-- summary: 2-4 sentence summary of chapter content
-- keyTakeaways: array of 3-5 bullet point takeaways
+This is the beginning of the document. Start numbering from chapter 1.
 
-Document text:
-{documentText}
-
-IMPORTANT: Return only valid JSON array. No markdown formatting.
+Rules:
+- Identify chapter boundaries (Chapter 1, numbered sections, clear topic shifts).
+- Provide a 2-3 sentence summary and 3-5 key takeaways.
+- Only return chapters present in THIS text.
 ```
 
-**Step 3: Boundary Detection Patterns**
+**Step 4: Context Management**
 
-- "Chapter [Number]" or "Chapter [Word]" (One, Two, Three)
-- Numbered sections (1., 2., 1.1, 2.1)
-- Clear topic shifts (paragraph breaks with new themes)
-- Page breaks (if detected in extracted text)
+- Maintains chapter number and title context between chunks
+- Prevents duplicate chapter entries from overlapping chunks
+- Continues numbering from where previous chunk ended
 
-**Step 4: Response Validation**
+**Step 5: Response Validation**
 
 - Validate JSON structure
-- Ensure all required fields present
+- Ensure all required fields present (chapterNumber, title, summary, keyTakeaways)
+- Remove duplicate chapters based on title
 - Sort chapters by chapterNumber
 
 ### Error Handling
@@ -206,7 +212,7 @@ Frontend calls POST /api/ai/summarize-chapters/:documentId
         ↓
 Backend validates documentId + user access
         ↓
-AI service processes document text
+AI service processes document text using chunking with overlap
         ↓
 Returns structured chapter data
         ↓
@@ -221,6 +227,7 @@ ChapterSummaryView renders with data
 - **Document Size Threshold**: Chapter detection enabled for >10,000 characters
 - **Max Chapters**: Display up to 100 chapters without performance degradation
 - **Chunked Rendering**: Large chapter lists render progressively
+- **Intelligent Chunking**: 80,000 character chunks with 10,000 character overlap to maintain context
 
 ## Accessibility
 

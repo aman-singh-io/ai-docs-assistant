@@ -21,6 +21,7 @@ export const API_PATHS = {
     GENERATE_FLASHCARDS: "/api/ai/generate-flashcards",
     GENERATE_QUIZ: "/api/ai/generate-quiz",
     GENERATE_SUMMARY: "/api/ai/generate-summary",
+    GENERATE_CHAPTERS: "/api/ai/summarize-chapters/:documentId",
     CHAT: "/api/ai/chat",
     EXPLAIN_CONCEPT: "/api/ai/explain-concept",
     GET_CHAT_HISTORY: (documentId) => `/api/ai/chat-history/${documentId}`,

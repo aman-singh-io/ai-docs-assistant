@@ -352,7 +352,6 @@ export const generateChapterSummaries = async (req, res, next) => {
       })
     }
 
-    // Verify document ownership and availability
     const document = await Document.findOne({
       _id: documentId,
       userId: req.user._id,
@@ -367,7 +366,24 @@ export const generateChapterSummaries = async (req, res, next) => {
       })
     }
 
-    // Check document length - requires minimum 10,000 characters
+    if (
+      document.hasChapterSummaries &&
+      document.chapters &&
+      document.chapters.length > 0
+    ) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          documentId: document._id,
+          title: document.title,
+          chapters: document.chapters,
+          isCached: true,
+          generatedAt: document.updatedAt,
+        },
+        message: 'Chapter summaries retrieved from cache',
+      })
+    }
+
     if (!document.extractedText || document.extractedText.length < 10000) {
       return res.status(422).json({
         success: false,
@@ -377,15 +393,23 @@ export const generateChapterSummaries = async (req, res, next) => {
       })
     }
 
-    // Generate chapter summaries using AI
     const chapters = await detectChapters(document.extractedText)
 
-    res.status(200).json({
+    document.chapters = chapters
+    document.hasChapterSummaries = true
+    document.chapterSummaryVersion = 'v1.0.0'
+    document.updatedAt = new Date()
+
+    await document.save()
+
+    return res.status(200).json({
       success: true,
       data: {
         documentId: document._id,
         title: document.title,
         chapters,
+        isCached: false,
+        generatedAt: new Date(),
       },
       message: 'Chapter summaries generated successfully',
     })
@@ -401,6 +425,7 @@ export const generateChapterSummaries = async (req, res, next) => {
         statusCode: 422,
       })
     }
+
     if (
       error.message === 'Failed to detect chapters' ||
       error.message === 'Invalid chapter response format' ||
@@ -412,6 +437,7 @@ export const generateChapterSummaries = async (req, res, next) => {
         statusCode: 500,
       })
     }
+
     next(error)
   }
 }

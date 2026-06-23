@@ -83,7 +83,7 @@ ${contextInstruction}
     while (retries > 0 && !success) {
       try {
         response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.5-flash',
           contents: [{ text: PROMPT }, { text: chunk }],
           config: {
             temperature: 0.1,
@@ -128,18 +128,30 @@ ${contextInstruction}
         // 🛑 arrêt propre si quota final
         if (is429 || is503) {
           console.error('🚫 Quota atteint ou service indisponible. Arrêt.')
-          return allChapters
+          stopProcessing = true
+          throw new Error(
+            'Failed to generate chapter summaries. Please try again. (Rate limit/surcharge)',
+          )
+          break
         }
 
         // ❌ erreur critique
         console.error(`❌ Erreur fatale sur bloc ${currentIndex}:`, error)
         stopProcessing = true
+        throw new Error(
+          'Failed to generate chapter summaries. Please try again. (Rate limit/surcharge)',
+        )
         break
       }
     }
 
     // 🛑 stop global si erreur fatale
-    if (stopProcessing) break
+    if (stopProcessing) {
+      throw new Error(
+        'Failed to generate chapter summaries. Please try again. (Rate limit/surcharge)',
+      )
+      break
+    }
 
     // 📦 traitement réponse
     if (success && response?.text) {

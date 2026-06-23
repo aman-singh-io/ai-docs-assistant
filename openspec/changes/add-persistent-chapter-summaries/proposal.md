@@ -10,6 +10,7 @@ Enhance the existing chapter summary feature to store generated chapter summarie
 ## Problem Statement
 
 Currently, chapter summaries are generated on-demand each time a user requests them. This approach:
+
 - Requires repeated AI processing for the same document
 - Creates unnecessary API calls and costs
 - Provides a suboptimal user experience for frequently accessed documents
@@ -18,6 +19,7 @@ Currently, chapter summaries are generated on-demand each time a user requests t
 ## Solution
 
 Implement database storage for chapter summaries that:
+
 - Stores generated chapter data with each document
 - Retrieves and displays stored summaries when available
 - Generates new summaries only when needed (document updates, manual refresh)
@@ -37,9 +39,8 @@ Implement database storage for chapter summaries that:
 
 1. **Database Schema**: Extend Document model to include chapter summary data
 2. **API Integration**: Update existing endpoint to check for stored data
-3. **Cache Management**: Implement logic to invalidate and refresh stored summaries
-4. **Performance**: Ensure minimal impact on document loading times
-5. **Security**: Maintain document access controls for stored chapter data
+3. **Performance**: Ensure minimal impact on document loading times
+4. **Security**: Maintain document access controls for stored chapter data
 
 ## Implementation Plan
 
@@ -60,7 +61,6 @@ Implement database storage for chapter summaries that:
 3. **Service Layer**
    - Add helper functions for chapter data management
    - Implement version comparison logic
-   - Add cache invalidation mechanisms
 
 ### Frontend Changes
 
@@ -120,6 +120,7 @@ Frontend displays chapter summaries
 ### POST /api/ai/summarize-chapters/:documentId
 
 **Behavior**:
+
 - Check if document has stored chapters with valid version
 - If valid stored chapters exist → return them immediately
 - If no stored chapters or version is outdated → generate new chapters
@@ -127,6 +128,7 @@ Frontend displays chapter summaries
 - Return chapters to client
 
 **Response (200 OK)**:
+
 ```json
 {
   "success": true,
@@ -152,11 +154,13 @@ Frontend displays chapter summaries
 ## User Experience
 
 ### Before Enhancement
+
 - User must wait for AI processing each time
 - No persistent access to chapter information
 - High API usage for repeated access
 
 ### After Enhancement
+
 - Immediate access to chapter summaries
 - Option to refresh when needed
 - Reduced AI API usage
@@ -182,13 +186,7 @@ Frontend displays chapter summaries
    - Controller logic for stored vs new chapter retrieval
    - Version comparison logic
 
-2. **Integration Tests**
-   - End-to-end flow with stored vs new chapter generation
-   - Cache invalidation scenarios
-   - Database persistence tests
-
-3. **User Acceptance Tests**
-   - Performance comparison between cached and new generation
+2. **User Acceptance Tests**
    - User experience validation
    - Edge case handling (very large documents, etc.)
 

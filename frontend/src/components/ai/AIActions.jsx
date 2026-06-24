@@ -234,7 +234,7 @@ const AIActions = ({ documentTextLength = 0 }) => {
         onClose={() => setIsModalOpen(false)}
         title={modalTitle}
       >
-        <div className='max-h-[60vh] overflow-y-auto prose prose-sm max-w-none prose-slate'>
+        <div className='max-h-[70vh] overflow-y-auto prose prose-sm max-w-none prose-slate'>
           <MarkdownRenderer content={modalContent} />
         </div>
       </Modal>

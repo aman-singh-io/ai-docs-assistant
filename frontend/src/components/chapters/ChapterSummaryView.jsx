@@ -48,9 +48,7 @@ const ChapterSummaryView = ({
             key={index}
             className='flex items-start gap-2 text-sm text-slate-600'
           >
-            <span className='text-emerald-600 font-semibold'>
-              {index + 1} :
-            </span>
+            <span className='text-emerald-600 font-semibold'>{index + 1}</span>
             <span>{takeaway}</span>
           </li>
         ))}
@@ -140,7 +138,7 @@ const ChapterSummaryView = ({
       {/* Chapter List */}
       {!isGenerating && chapters && chapters.length > 0 && (
         <div
-          className='p-6 max-h-[60vh] overflow-y-auto'
+          className='p-4 md:p-6 max-h-[70vh] overflow-y-auto'
           role='region'
           aria-label='Chapter summaries'
           tabIndex={0}
@@ -149,7 +147,7 @@ const ChapterSummaryView = ({
             {chapters.map((chapter, index) => (
               <div
                 key={index}
-                className='border border-slate-200 rounded-xl overflow-hidden transition-all duration-200 hover:border-emerald-300 focus-within:border-emerald-400'
+                className='border border-slate-200 rounded-xl overflow-hidden transition-all duration-200 hover:border-emerald-300 focus-within:border-emerald-400 mb-3'
               >
                 <button
                   onClick={() => handleToggleChapter(index)}
@@ -185,11 +183,11 @@ const ChapterSummaryView = ({
                 </button>
                 <div
                   id={`chapter-details-${index}`}
-                  className={`transition-all duration-300 ${expandedChapters[index] ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}
+                  className={`transition-all duration-300 ${expandedChapters[index] ? 'max-h-[3000px] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'}`}
                 >
                   <div className='p-4 bg-white border-t border-slate-200 space-y-4'>
                     <div>
-                      <p className='text-sm text-slate-700 leading-relaxed'>
+                      <p className='text-sm text-slate-700 leading-relaxed whitespace-pre-wrap'>
                         {chapter.summary}
                       </p>
                     </div>

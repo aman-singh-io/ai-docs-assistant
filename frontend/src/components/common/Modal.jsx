@@ -12,7 +12,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           onClick={onClose}
         ></div>
 
-        <div className='relative w-full max-w-6xl bg-white/95 backdrop-blur-xl border border-slate-200/60 rounded-2xl shadow-2xl shadow-slate-900/20 p-8 z-10 animate-in fade-in slide-in-from-bottom-4 duration-300'>
+        <div className='relative w-full max-w-6xl bg-white/95 backdrop-blur-xl border border-slate-200/60 rounded-2xl shadow-2xl shadow-slate-900/20 p-4 sm:p-6 md:p-8 z-10 animate-in fade-in slide-in-from-bottom-4 duration-300'>
           <button
             onClick={onClose}
             className='absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200'
@@ -26,7 +26,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             </h3>
           </div>
 
-          <div>{children}</div>
+          <div className="max-h-[70vh] overflow-y-auto">{children}</div>
         </div>
       </div>
     </div>

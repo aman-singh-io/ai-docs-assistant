@@ -53,6 +53,41 @@ const documentSchema = new mongoose.Schema({
     type: String,
     enum: ['processing', 'ready', 'failed'],
     default: 'processing'
+  },
+  // Chapter summary data
+  chapters: [{
+    chapterNumber: {
+      type: Number,
+      required: true
+    },
+    title: {
+      type: String,
+      required: true
+    },
+    summary: {
+      type: String,
+      required: true
+    },
+    keyTakeaways: [{
+      type: String,
+      required: true
+    }],
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  hasChapterSummaries: {
+    type: Boolean,
+    default: false
+  },
+  chapterSummaryVersion: {
+    type: String,
+    default: 'v1.0.0' // Version tracking for updates
   }
 }, {
   timestamps: true
@@ -60,6 +95,7 @@ const documentSchema = new mongoose.Schema({
 
 // Index for faster queries
 documentSchema.index({ userId: 1, uploadDate: -1 });
+documentSchema.index({ hasChapterSummaries: 1 });
 
 const Document = mongoose.model('Document', documentSchema);
 

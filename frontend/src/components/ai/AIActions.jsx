@@ -1,218 +1,219 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
-import { Sparkles, BookOpen, Lightbulb, FileText } from "lucide-react";
-import aiService from "../../services/aiService";
-import toast from "react-hot-toast";
-import MarkdownRenderer from "../common/MarkdownRenderer";
-import Modal from "../common/Modal";
-import ChapterSummaryView from "../chapters/ChapterSummaryView";
+import React, { useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { Sparkles, BookOpen, Lightbulb, FileText } from 'lucide-react'
+import aiService from '../../services/aiService'
+import toast from 'react-hot-toast'
+import MarkdownRenderer from '../common/MarkdownRenderer'
+import Modal from '../common/Modal'
+import ChapterSummaryView from '../chapters/ChapterSummaryView'
 
 const AIActions = ({ documentTextLength = 0 }) => {
-
-  const { id: documentId } = useParams();
-  const [loadingAction, setLoadingAction] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState("");
-  const [modalTitle, setModalTitle] = useState("");
-  const [concept, setConcept] = useState("");
-  const [chapterLoading, setChapterLoading] = useState(false);
-  const [chapterData, setChapterData] = useState(null);
-  const [showChapters, setShowChapters] = useState(false);
+  const { id: documentId } = useParams()
+  const [loadingAction, setLoadingAction] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalContent, setModalContent] = useState('')
+  const [modalTitle, setModalTitle] = useState('')
+  const [concept, setConcept] = useState('')
+  const [chapterLoading, setChapterLoading] = useState(false)
+  const [chapterData, setChapterData] = useState(null)
+  const [showChapters, setShowChapters] = useState(false)
 
   const handleGenerateSummary = async () => {
-    setLoadingAction("summary");
+    setLoadingAction('summary')
     try {
-      const { summary } = await aiService.generateSummary(documentId);
-      setModalTitle("Generated Summary");
-      setModalContent(summary);
-      setIsModalOpen(true);
+      const { summary } = await aiService.generateSummary(documentId)
+      setModalTitle('Generated Summary')
+      setModalContent(summary)
+      setIsModalOpen(true)
     } catch (error) {
-      toast.error("Failed to generate summary.");
+      toast.error('Failed to generate summary.')
     } finally {
-      setLoadingAction(null);
+      setLoadingAction(null)
     }
-  };
+  }
 
   const handleExplainConcept = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     if (!concept.trim()) {
-      toast.error("Please enter a concept to explain.");
-      return;
+      toast.error('Please enter a concept to explain.')
+      return
     }
-    setLoadingAction("explain");
+    setLoadingAction('explain')
     try {
       const { explanation } = await aiService.explainConcept(
         documentId,
-        concept
-      );
-      setModalTitle(`Explanation of "${concept}"`);
-      setModalContent(explanation);
-      setIsModalOpen(true);
-      setConcept("");
+        concept,
+      )
+      setModalTitle(`Explanation of "${concept}"`)
+      setModalContent(explanation)
+      setIsModalOpen(true)
+      setConcept('')
     } catch (error) {
-      toast.error("Failed to explain concept.");
+      toast.error('Failed to explain concept.')
     } finally {
-      setLoadingAction(null);
+      setLoadingAction(null)
     }
-  };
+  }
 
   const handleGenerateChapters = async () => {
-    setChapterLoading(true);
+    setChapterLoading(true)
     try {
-      const data = await aiService.generateChapterSummaries(documentId);
-      setChapterData(data.chapters);
-      setShowChapters(true);
-      toast.success('Chapter summaries generated successfully!');
+      const data = await aiService.generateChapterSummaries(documentId)
+      setChapterData(data.chapters)
+      setShowChapters(true)
+      toast.success('Chapter summaries generated successfully!')
     } catch (error) {
       if (error.statusCode === 422) {
-        setDocumentTextLength(0); // Trigger disabled state
-        toast.error('Document too short for chapter generation (min 10k chars)');
+        setDocumentTextLength(0) // Trigger disabled state
+        toast.error('Document too short for chapter generation (min 10k chars)')
       } else {
-        toast.error('Failed to generate chapter summaries.');
+        toast.error(
+          'Failed to generate chapter summaries. Please try again. (Rate limit/surcharge)',
+        )
       }
-      setChapterData(null);
+      setChapterData(null)
     } finally {
-      setChapterLoading(false);
+      setChapterLoading(false)
     }
-  };
+  }
 
   return (
     <>
-    <div className="bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden">
+      <div className='bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden'>
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-200/60 bg-linear-to-br from-slate-50/50 to-white/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" strokeWidth={2} />
+        <div className='px-6 py-5 border-b border-slate-200/60 bg-linear-to-br from-slate-50/50 to-white/50'>
+          <div className='flex items-center gap-3'>
+            <div className='w-10 h-10 rounded-xl bg-linear-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25 flex items-center justify-center'>
+              <Sparkles className='w-5 h-5 text-white' strokeWidth={2} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className='text-lg font-semibold text-slate-900'>
                 AI Assistant
               </h3>
-              <p className="text-xs text-slate-500">Powered by advanced AI</p>
+              <p className='text-xs text-slate-500'>Powered by advanced AI</p>
             </div>
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className='p-6 space-y-6'>
           {/* Chapter Summary */}
-          <div className="group p-5 bg-linear-to-br from-slate-50/50 to-white rounded-xl border border-slate-200/60 hover:border-emerald-300/60 hover:shadow-md transition-all duration-200">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-linear-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
+          <div className='group p-5 bg-linear-to-br from-slate-50/50 to-white rounded-xl border border-slate-200/60 hover:border-emerald-300/60 hover:shadow-md transition-all duration-200'>
+            <div className='flex items-start justify-between gap-4'>
+              <div className='flex-1'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <div className='w-8 h-8 rounded-lg bg-linear-to-br from-emerald-100 to-emerald-200 flex items-center justify-center'>
                     <FileText
-                      className="w-4 h-4 text-emerald-600"
+                      className='w-4 h-4 text-emerald-600'
                       strokeWidth={2}
                     />
                   </div>
-                  <h4 className="font-semibold text-slate-900">
+                  <h4 className='font-semibold text-slate-900'>
                     Chapter Summary
                   </h4>
                 </div>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Get an AI-detected chapter breakdown with summaries and key takeaways.
+                <p className='text-sm text-slate-600 leading-relaxed'>
+                  Get an AI-detected chapter breakdown with summaries and key
+                  takeaways.
                 </p>
               </div>
               <button
                 onClick={handleGenerateChapters}
                 disabled={chapterLoading || documentTextLength < 10000}
-                className="shrink-0 h-10 px-5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
-                aria-label="Generate chapter summary"
+                className='shrink-0 h-10 px-5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95'
+                aria-label='Generate chapter summary'
               >
                 {chapterLoading ? (
-                  <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className='flex items-center gap-2'>
+                    <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
                     Generating...
                   </span>
                 ) : (
-                  "Generate"
+                  'Generate'
                 )}
               </button>
             </div>
           </div>
 
           {/* Generate Summary */}
-          <div className="group p-5 bg-linear-to-br from-slate-50/50 to-white rounded-xl border border-slate-200/60 hover:border-slate-300/60 hover:shadow-md transition-all duration-200">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+          {/* <div className='group p-5 bg-linear-to-br from-slate-50/50 to-white rounded-xl border border-slate-200/60 hover:border-slate-300/60 hover:shadow-md transition-all duration-200'>
+            <div className='flex items-start justify-between gap-4'>
+              <div className='flex-1'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <div className='w-8 h-8 rounded-lg bg-linear-to-br from-blue-100 to-cyan-100 flex items-center justify-center'>
                     <BookOpen
-                      className="w-4 h-4 text-blue-600"
+                      className='w-4 h-4 text-blue-600'
                       strokeWidth={2}
                     />
                   </div>
-                  <h4 className="font-semibold text-slate-900">
+                  <h4 className='font-semibold text-slate-900'>
                     Generate Summary
                   </h4>
                 </div>
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <p className='text-sm text-slate-600 leading-relaxed'>
                   Get a concise summary of the entire document.
                 </p>
               </div>
               <button
                 onClick={handleGenerateSummary}
-                disabled={loadingAction === "summary"}
-                className="shrink-0 h-10 px-5 bg-linear-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-600 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                disabled={loadingAction === 'summary'}
+                className='shrink-0 h-10 px-5 bg-linear-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-600 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95'
               >
-                {loadingAction === "summary" ? (
-                  <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                {loadingAction === 'summary' ? (
+                  <span className='flex items-center gap-2'>
+                    <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
                     Loading...
                   </span>
                 ) : (
-                  "Summarize"
+                  'Summarize'
                 )}
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Explain Concept */}
-          <div className="group p-5 bg-linear-to-br from-slate-50/50 to-white rounded-xl border border-slate-200/60 hover:border-slate-300/60 hover:shadow-md transition-all duration-200">
+          <div className='group p-5 bg-linear-to-br from-slate-50/50 to-white rounded-xl border border-slate-200/60 hover:border-slate-300/60 hover:shadow-md transition-all duration-200'>
             <form onSubmit={handleExplainConcept}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-linear-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+              <div className='flex items-center gap-2 mb-3'>
+                <div className='w-8 h-8 rounded-lg bg-linear-to-br from-amber-100 to-orange-100 flex items-center justify-center'>
                   <Lightbulb
-                    className="w-4 h-4 text-amber-600"
+                    className='w-4 h-4 text-amber-600'
                     strokeWidth={2}
                   />
                 </div>
-                <h4 className="font-semibold text-slate-900">
+                <h4 className='font-semibold text-slate-900'>
                   Explain a Concept
                 </h4>
               </div>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
+              <p className='text-sm text-slate-600 leading-relaxed mb-4'>
                 Enter a topic or concept from the document to get a detailed
                 explanation.
               </p>
-              <div className="flex items-center gap-3">
+              <div className='flex items-center gap-3'>
                 <input
-                  type="text"
+                  type='text'
                   value={concept}
                   onChange={(e) => setConcept(e.target.value)}
                   placeholder="e.g., 'React Hooks'"
-                  className="flex-1 h-11 px-4 border-2 border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 text-sm font-medium transition-all duration-200 focus:outline-none focus:border-emerald-500 focus:bg-white focus:shadow-lg focus:shadow-purple-500/10"
-                  disabled={loadingAction === "explain"}
+                  className='flex-1 h-11 px-4 border-2 border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 text-sm font-medium transition-all duration-200 focus:outline-none focus:border-emerald-500 focus:bg-white focus:shadow-lg focus:shadow-purple-500/10'
+                  disabled={loadingAction === 'explain'}
                 />
                 <button
-                  type="submit"
-                  disabled={loadingAction === "explain" || !concept.trim()}
-                  className="shrink-0 h-11 px-5 bg-linear-to-r from-emerald-600 to-emerald-500 hover:from-emerald-600 hover:to-emerald-600 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                  type='submit'
+                  disabled={loadingAction === 'explain' || !concept.trim()}
+                  className='shrink-0 h-11 px-5 bg-linear-to-r from-emerald-600 to-emerald-500 hover:from-emerald-600 hover:to-emerald-600 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95'
                 >
-                  {loadingAction === "explain" ? (
-                    <span className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  {loadingAction === 'explain' ? (
+                    <span className='flex items-center gap-2'>
+                      <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
                       Loading...
                     </span>
                   ) : (
-                    "Explain"
+                    'Explain'
                   )}
                 </button>
               </div>
             </form>
           </div>
-
         </div>
       </div>
 
@@ -233,7 +234,7 @@ const AIActions = ({ documentTextLength = 0 }) => {
         onClose={() => setIsModalOpen(false)}
         title={modalTitle}
       >
-        <div className="max-h-[60vh] overflow-y-auto prose prose-sm max-w-none prose-slate">
+        <div className='max-h-[60vh] overflow-y-auto prose prose-sm max-w-none prose-slate'>
           <MarkdownRenderer content={modalContent} />
         </div>
       </Modal>

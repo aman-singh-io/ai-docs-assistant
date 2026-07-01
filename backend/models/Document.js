@@ -72,6 +72,20 @@ const documentSchema = new mongoose.Schema({
       type: String,
       required: true
     }],
+    characterDetails: [{
+      name: { type: String },
+      physicalAppearance: { type: String, default: '' },
+      clothing: { type: String, default: '' },
+      items: [{ type: String }]
+    }],
+    characterMentions: [{
+      name: { type: String },
+      role: { type: String, default: '' },
+      relationships: [{
+        with: { type: String },
+        note: { type: String }
+      }]
+    }],
     createdAt: {
       type: Date,
       default: Date.now

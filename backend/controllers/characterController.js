@@ -167,6 +167,8 @@ export const extractRelationships = async (req, res, next) => {
       const extracted = await extractRelationshipsFromLLM(
         chapter.summary,
         chapter.chapterNumber,
+        chapter.characterDetails || [],
+        chapter.characterMentions || [],
       )
 
       if (extracted.length > 0) {
@@ -302,10 +304,13 @@ export const getCharacterProfile = async (req, res, next) => {
 
     const nameRegex = new RegExp(escapeRegex(name), 'i')
     const relevantChapters = document.chapters
-      .filter(
-        (ch) =>
-          ch.chapterNumber <= Number(upToChapter) && nameRegex.test(ch.summary),
-      )
+      .filter((ch) => {
+        if (ch.chapterNumber > Number(upToChapter)) return false
+        if (nameRegex.test(ch.summary)) return true
+        if (ch.characterMentions?.some((m) => nameRegex.test(m.name))) return true
+        if (ch.characterDetails?.some((d) => nameRegex.test(d.name))) return true
+        return false
+      })
       .sort((a, b) => a.chapterNumber - b.chapterNumber)
 
     if (relevantChapters.length === 0) {
@@ -316,10 +321,26 @@ export const getCharacterProfile = async (req, res, next) => {
       })
     }
 
+    const nameRegex2 = new RegExp(escapeRegex(name), 'i')
+    const aggregatedDetails = relevantChapters
+      .map((ch) => {
+        const detail = ch.characterDetails?.find((d) => nameRegex2.test(d.name))
+        if (!detail) return null
+        return {
+          chapterNumber: ch.chapterNumber,
+          physicalAppearance: detail.physicalAppearance || '',
+          clothing: detail.clothing || '',
+          items: detail.items || [],
+        }
+      })
+      .filter(Boolean)
+      .filter((d) => d.physicalAppearance || d.clothing || d.items.length > 0)
+
     const profileText = await generateProfileFromLLM(
       name,
       Number(upToChapter),
       relevantChapters,
+      aggregatedDetails,
     )
 
     await CharacterProfile.create({

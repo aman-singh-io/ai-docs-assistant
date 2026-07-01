@@ -13,67 +13,6 @@ if (!process.env.GEMINI_API_KEY) {
 }
 
 /**
- * Generate flashcards from text
- * @param {string} text - Document text
- * @param {number} count - Number of flashcards to generate
- * @returns {Promise<Array<{question: string, answer: string, difficulty: string}>>}
- */
-export const generateFlashcards = async (text, count = 10) => {
-  const prompt = `Generate exactly ${count} educational flashcards from the following text. 
-  Format each flashcard as:
-  Q: [Clear, specific question]
-  A: [Concise, accurate answer]
-  D: [Difficulty level: easy, medium, or hard]
-  
-  Separate each flashcard with "---"
-  
-  Text:
-  ${text.substring(0, 15000)}`
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-lite',
-      contents: prompt,
-    })
-
-    const generatedText = response.text
-
-    // Parse the response
-    const flashcards = []
-    const cards = generatedText.split('---').filter((c) => c.trim())
-
-    for (const card of cards) {
-      const lines = card.trim().split('\n')
-      let question = '',
-        answer = '',
-        difficulty = 'medium'
-
-      for (const line of lines) {
-        if (line.startsWith('Q:')) {
-          question = line.substring(2).trim()
-        } else if (line.startsWith('A:')) {
-          answer = line.substring(2).trim()
-        } else if (line.startsWith('D:')) {
-          const diff = line.substring(2).trim().toLowerCase()
-          if (['easy', 'medium', 'hard'].includes(diff)) {
-            difficulty = diff
-          }
-        }
-      }
-
-      if (question && answer) {
-        flashcards.push({ question, answer, difficulty })
-      }
-    }
-
-    return flashcards.slice(0, count)
-  } catch (error) {
-    console.error('Gemini API error:', error)
-    throw new Error('Failed to generate flashcards')
-  }
-}
-
-/**
  * Generate quiz questions
  * @param {string} text - Document text
  * @param {number} numQuestions - Number of questions
@@ -222,9 +161,43 @@ export const chatWithContext = async (question, chunks) => {
  * @param {number} chapterNumber - The chapter number
  * @returns {Promise<Array<{source: string, target: string, relationshipType: string, context: string}>>}
  */
-export const extractRelationships = async (chapterSummary, chapterNumber) => {
-  const prompt = `You are an expert literary analyst extracting character relationships from a chapter summary.
+export const extractRelationships = async (
+  chapterSummary,
+  chapterNumber,
+  characterDetails = [],
+  characterMentions = [],
+) => {
+  let contextBlock = ''
 
+  if (characterDetails.length > 0) {
+    const detailLines = characterDetails
+      .map((cd) => {
+        const parts = []
+        if (cd.physicalAppearance)
+          parts.push(`appearance: ${cd.physicalAppearance}`)
+        if (cd.clothing) parts.push(`clothing: ${cd.clothing}`)
+        if (cd.items?.length) parts.push(`items: ${cd.items.join(', ')}`)
+        return `- ${cd.name}: ${parts.join(' | ')}`
+      })
+      .join('\n')
+    contextBlock += `\nKnown character details in this chapter:\n${detailLines}\n`
+  }
+
+  if (characterMentions.length > 0) {
+    const mentionLines = characterMentions
+      .map((cm) => {
+        const relPart =
+          cm.relationships?.length > 0
+            ? ` (interacts with: ${cm.relationships.map((r) => r.with).join(', ')})`
+            : ''
+        return `- ${cm.name}${cm.role ? `: ${cm.role}` : ''}${relPart}`
+      })
+      .join('\n')
+    contextBlock += `\nAll named characters present in this chapter (DO NOT miss any of these):\n${mentionLines}\n`
+  }
+
+  const prompt = `You are an expert literary analyst extracting character relationships from a chapter summary.
+${contextBlock}
 Chapter ${chapterNumber} Summary:
 ${chapterSummary}
 
@@ -235,12 +208,13 @@ CRITICAL RULES:
 2. NO TITLES: Strip all honorifics, titles, or prefixes from character names. Use ONLY the core first name or full name. (e.g., Use "Calder" instead of "Prince Calder", use "Elara" instead of "Queen Elara", use "Smith" instead of "Mr. Smith").
 3. CONSISTENCY: Always use the exact same spelling for a character.
 4. If no specific named character relationships are described, return an empty array [].
+5. COMPLETENESS: Consider ALL characters listed in the context above — do not overlook characters who appear briefly.
 
 EXAMPLES:
 BAD: { "source": "Prince Calder", "target": "allies", "relationshipType": "ally", "context": "..." }
 GOOD: { "source": "Calder", "target": "Kael", "relationshipType": "ally", "context": "..." }`
 
-  let retries = 10 // 👈 MODIFIÉ ICI
+  let retries = 10
   let retryDelay = 15000
   let success = false
   let response
@@ -338,26 +312,48 @@ export const generateCharacterProfile = async (
   characterName,
   upToChapter,
   summaries,
+  aggregatedDetails = [],
 ) => {
   const summaryText = summaries
     .map((ch) => `[Chapter ${ch.chapterNumber}: ${ch.title}]\n${ch.summary}`)
     .join('\n\n')
 
+  let appearanceContext = ''
+  if (aggregatedDetails.length > 0) {
+    const detailLines = aggregatedDetails
+      .map((entry) => {
+        const parts = []
+        if (entry.physicalAppearance)
+          parts.push(`Physical: ${entry.physicalAppearance}`)
+        if (entry.clothing) parts.push(`Clothing: ${entry.clothing}`)
+        if (entry.items?.length) parts.push(`Items: ${entry.items.join(', ')}`)
+        return `[Ch.${entry.chapterNumber}] ${parts.join(' | ')}`
+      })
+      .join('\n')
+    appearanceContext = `\nKnown appearance details for ${characterName}:\n${detailLines}\n`
+  }
+
+  const hasAppearance = aggregatedDetails.length > 0
+  const portraitInstruction = hasAppearance
+    ? `4. Portrait (synthesise a coherent description of their appearance, clothing, and notable possessions from the details above — do NOT list by chapter, do NOT invent any trait not explicitly provided)`
+    : ''
+
   const prompt = `You are writing a spoiler-free character wiki entry for a book.
 
 Character: ${characterName}
 Based on: Chapters 1 through ${upToChapter} ONLY
-
+${appearanceContext}
 Chapter Summaries (chronological order):
 ${summaryText}
 
-Write a concise wiki-style biography for ${characterName} using ONLY the information in these summaries.
+Write a concise wiki-style biography for ${characterName} using ONLY the information in these summaries${hasAppearance ? ' and the appearance details provided above' : ''}.
 Structure it as:
 1. Overview paragraph (who they are, their role in the story so far)
 2. Key relationships (characters they interact with in these chapters)
 3. Notable events (what has happened to/with them up to chapter ${upToChapter})
+${portraitInstruction}
 
-CRITICAL RULE: Do NOT include, reference, or imply ANY events after Chapter ${upToChapter}. This profile must be completely spoiler-free.`
+CRITICAL RULE: Do NOT include, reference, or imply ANY events after Chapter ${upToChapter}. This profile must be completely spoiler-free.${hasAppearance ? '\nFor the Portrait section: only include traits explicitly provided in the appearance data above. Do NOT invent or guess any physical details.' : ''}`
 
   try {
     const response = await ai.models.generateContent({

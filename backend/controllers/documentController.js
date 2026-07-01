@@ -1,5 +1,4 @@
 import Document from '../models/Document.js';
-import Flashcard from '../models/Flashcard.js';
 import Quiz from '../models/Quiz.js';
 import { extractTextFromPDF } from '../utils/pdfParser.js';
 import { chunkText } from '../utils/textChunker.js';
@@ -100,14 +99,6 @@ export const getDocuments = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: 'flashcards',
-          localField: '_id',
-          foreignField: 'documentId',
-          as: 'flashcardSets'
-        }
-      },
-      {
-        $lookup: {
           from: 'quizzes',
           localField: '_id',
           foreignField: 'documentId',
@@ -116,7 +107,6 @@ export const getDocuments = async (req, res, next) => {
       },
       {
         $addFields: {
-          flashcardCount: { $size: '$flashcardSets' },
           quizCount: { $size: '$quizzes' }
         }
       },
@@ -124,7 +114,6 @@ export const getDocuments = async (req, res, next) => {
         $project: {
           extractedText: 0,
           chunks: 0,
-          flashcardSets: 0,
           quizzes: 0
         }
       },
@@ -161,8 +150,6 @@ export const getDocument = async (req, res, next) => {
       });
     }
 
-    // Get counts of associated flashcards and quizzes
-    const flashcardCount = await Flashcard.countDocuments({ documentId: document._id, userId: req.user._id });
     const quizCount = await Quiz.countDocuments({ documentId: document._id, userId: req.user._id });
 
     // Update last accessed
@@ -171,7 +158,6 @@ export const getDocument = async (req, res, next) => {
 
     // Combine document data with counts
     const documentData = document.toObject();
-    documentData.flashcardCount = flashcardCount;
     documentData.quizCount = quizCount;
 
     res.status(200).json({

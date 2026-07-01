@@ -1,5 +1,4 @@
 import Document from '../models/Document.js';
-import Flashcard from '../models/Flashcard.js';
 import Quiz from '../models/Quiz.js';
 
 // @desc    Get user learning statistics
@@ -11,21 +10,8 @@ export const getDashboard = async (req, res, next) => {
 
     // Get counts
     const totalDocuments = await Document.countDocuments({ userId });
-    const totalFlashcardSets = await Flashcard.countDocuments({ userId });
     const totalQuizzes = await Quiz.countDocuments({ userId });
     const completedQuizzes = await Quiz.countDocuments({ userId, completedAt: { $ne: null } });
-
-    // Get flashcard statistics
-    const flashcardSets = await Flashcard.find({ userId });
-    let totalFlashcards = 0;
-    let reviewedFlashcards = 0;
-    let starredFlashcards = 0;
-
-    flashcardSets.forEach(set => {
-      totalFlashcards += set.cards.length;
-      reviewedFlashcards += set.cards.filter(c => c.reviewCount > 0).length;
-      starredFlashcards += set.cards.filter(c => c.isStarred).length;
-    });
 
     // Get quiz statistics
     const quizzes = await Quiz.find({ userId, completedAt: { $ne: null } });
@@ -53,10 +39,6 @@ export const getDashboard = async (req, res, next) => {
       data: {
         overview: {
           totalDocuments,
-          totalFlashcardSets,
-          totalFlashcards,
-          reviewedFlashcards,
-          starredFlashcards,
           totalQuizzes,
           completedQuizzes,
           averageScore,

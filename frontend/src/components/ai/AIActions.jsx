@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { Sparkles, BookOpen, Lightbulb, FileText } from 'lucide-react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Sparkles, BookOpen, Lightbulb, FileText, Share2 } from 'lucide-react'
 import aiService from '../../services/aiService'
 import toast from 'react-hot-toast'
 import MarkdownRenderer from '../common/MarkdownRenderer'
@@ -9,6 +9,7 @@ import ChapterSummaryView from '../chapters/ChapterSummaryView'
 
 const AIActions = ({ documentTextLength = 0 }) => {
   const { id: documentId } = useParams()
+  const navigate = useNavigate()
   const [loadingAction, setLoadingAction] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalContent, setModalContent] = useState('')
@@ -130,6 +131,35 @@ const AIActions = ({ documentTextLength = 0 }) => {
                 ) : (
                   'Generate'
                 )}
+              </button>
+            </div>
+          </div>
+
+          {/* Character Relationship Graph */}
+          <div className='group p-5 bg-linear-to-br from-slate-50/50 to-white rounded-xl border border-slate-200/60 hover:border-blue-300/60 hover:shadow-md transition-all duration-200'>
+            <div className='flex items-start justify-between gap-4'>
+              <div className='flex-1'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <div className='w-8 h-8 rounded-lg bg-linear-to-br from-blue-100 to-indigo-100 flex items-center justify-center'>
+                    <Share2
+                      className='w-4 h-4 text-blue-600'
+                      strokeWidth={2}
+                    />
+                  </div>
+                  <h4 className='font-semibold text-slate-900'>
+                    Character Graph
+                  </h4>
+                </div>
+                <p className='text-sm text-slate-600 leading-relaxed'>
+                  Visualize character relationships and explore the evolving
+                  character wiki by chapter.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate(`/documents/${documentId}/characters`)}
+                className='shrink-0 h-10 px-5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/25 active:scale-95'
+              >
+                View
               </button>
             </div>
           </div>

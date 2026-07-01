@@ -1,0 +1,39 @@
+## ADDED Requirements
+
+### Requirement: Generate a spoiler-free character biography up to a chapter ceiling
+The system SHALL accept `documentId`, `name`, and `upToChapter` as query parameters, filter stored chapter summaries to those where `chapterNumber <= upToChapter` AND the summary contains the character name (case-insensitive), then pass those summaries to the LLM to synthesize a wiki-style biography. The LLM SHALL be explicitly instructed to ignore any events past `upToChapter`.
+
+#### Scenario: Successful profile generation (cache miss)
+- **WHEN** a GET request is made to `/api/characters/profile?documentId=...&name=Hamlet&upToChapter=8` and no cached profile exists
+- **THEN** the system filters relevant summaries, calls the LLM, saves the result to `CharacterProfile`, and returns `{ success: true, data: { characterName, upToChapter, profile, fromCache: false } }`
+
+#### Scenario: Profile returned from cache
+- **WHEN** a GET request is made for the same `documentId`, `name` (case-insensitive), and `upToChapter` as a previous request
+- **THEN** the system returns the cached profile without calling the LLM, with `fromCache: true`
+
+#### Scenario: Character not found in any summary
+- **WHEN** the character name does not appear (case-insensitively) in any chapter summary up to `upToChapter`
+- **THEN** the system returns `404` with `{ success: false, error: "Character not found in chapters up to chapter N" }`
+
+#### Scenario: Document not found
+- **WHEN** the `documentId` does not match any document owned by the authenticated user
+- **THEN** the system returns `404` with `{ success: false, error: "Document not found" }`
+
+#### Scenario: Missing required query parameters
+- **WHEN** any of `documentId`, `name`, or `upToChapter` is absent
+- **THEN** the system returns `400` with `{ success: false, error: "documentId, name, and upToChapter are required" }`
+
+#### Scenario: Unauthenticated request
+- **WHEN** no valid JWT token is included in the request
+- **THEN** the system returns `401`
+
+### Requirement: Profile cache keyed by document, name, and chapter ceiling
+The system SHALL treat `(documentId, characterName, upToChapter)` as the cache key. Character name comparison SHALL be case-insensitive. Different `upToChapter` values produce independent cache entries.
+
+#### Scenario: Case-insensitive cache lookup
+- **WHEN** a profile for "harry" was previously cached and a new request uses "Harry"
+- **THEN** the cached profile is returned without calling the LLM
+
+#### Scenario: Different chapter ceiling creates new cache entry
+- **WHEN** a profile for "Harry" at `upToChapter=10` was cached and a request arrives for `upToChapter=15`
+- **THEN** the system generates a new profile for chapters 1-15 and caches it separately

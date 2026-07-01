@@ -39,35 +39,55 @@ export const detectChapters = async (text) => {
 
     const contextInstruction =
       lastChapterNumber > 0
-        ? `ATTENTION : Ceci est la suite d'un livre.
-Le bloc précédent s'est terminé sur le "Chapitre ${lastChapterNumber} : ${lastChapterTitle}".
+        ? `IMPORTANT: This is a continuation of a book.
+The previous block ended on "Chapter ${lastChapterNumber}: ${lastChapterTitle}".
 
-Règles importantes :
-- Ne recrée PAS ce chapitre.
-- Si le texte continue ce chapitre, ignore son début.
-- Commence uniquement à partir du chapitre ${lastChapterNumber + 1}.`
-        : 'Ceci est le début du document. Commence la numérotation au chapitre 1.'
+Key rules:
+- Do NOT recreate that chapter.
+- If the text continues that chapter, skip its beginning.
+- Start only from chapter ${lastChapterNumber + 1}.`
+        : 'This is the beginning of the document. Start numbering from chapter 1.'
 
     const PROMPT = `
-Tu es un analyste littéraire expert.
+You are an expert literary analyst.
 
-Ta mission est d'identifier les chapitres et de produire un résumé détaillé, structuré et fidèle au texte.
+Your mission is to identify story chapters and produce detailed, structured summaries faithful to the text.
 
 ${contextInstruction}
 
-📌 Consignes :
-- Repère les chapitres (Chapitre 1, 2, changements de sujet, titres implicites).
-- Ne mélange jamais deux chapitres.
-- Ignore les doublons.
+📌 Rules:
+- Only include chapters containing real narrative content (story, dialogue, action, scene description).
+- Never merge two chapters together.
+- Ignore duplicates.
 
-📊 Pour CHAQUE chapitre retourne un JSON :
+🚫 COMPLETELY IGNORE and do NOT include in your response:
+- Character lists, glossaries, name indexes
+- Tables of contents
+- Tables, structured lists, appendices
+- Prefaces, author's notes, warnings, acknowledgements
+- Title pages, dedications, epigraphs
+- Anything that is not a narrative chapter telling an actual story
+
+📊 For EACH narrative chapter return a JSON object with:
 
 - chapterNumber (number)
 - title (string)
-- summary (8 à 12 phrases détaillées)
-- keyTakeaways (5 à 8 points)
+- summary (8 to 12 detailed sentences)
+- keyTakeaways (5 to 8 bullet points)
+- characterDetails (array): for each character who has AT LEAST one physical description, clothing, or notable item in this chapter:
+  → name: character name (without title or honorific)
+  → physicalAppearance: physical description (hair, eyes, scars, build…) — empty string if not mentioned
+  → clothing: clothing or outfit worn — empty string if not mentioned
+  → items: notable objects carried or owned (weapons, artefacts, accessories) — empty array if none
+  → Do NOT include a character if none of these three fields are filled.
+  → Return [] if no such details are found in the chapter.
+- characterMentions (array): list ALL named characters present or mentioned in this chapter, even briefly:
+  → name: character name (without title or honorific)
+  → role: their role in this chapter in one short sentence
+  → relationships: interactions with other named characters in this chapter as [{ with: "CharacterName", note: "short description of the interaction" }] — empty array if no explicit interaction
+  → IMPORTANT: do not miss any named character, even if they appear only briefly.
 
-🚫 Retourne uniquement un tableau JSON valide.
+🚫 Return only a valid JSON array.
 `
 
     console.log(
@@ -75,7 +95,7 @@ ${contextInstruction}
     )
 
     let response
-    let retries = 3
+    let retries = 10
     let retryDelay = 15000
     let success = false
 
@@ -83,7 +103,7 @@ ${contextInstruction}
     while (retries > 0 && !success) {
       try {
         response = await ai.models.generateContent({
-          model: 'gemini-3.5-flash',
+          model: 'gemini-2.5-flash',
           contents: [{ text: PROMPT }, { text: chunk }],
           config: {
             temperature: 0.1,
@@ -100,6 +120,41 @@ ${contextInstruction}
                     type: Type.ARRAY,
                     items: { type: Type.STRING },
                   },
+                  characterDetails: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        name: { type: Type.STRING },
+                        physicalAppearance: { type: Type.STRING },
+                        clothing: { type: Type.STRING },
+                        items: {
+                          type: Type.ARRAY,
+                          items: { type: Type.STRING },
+                        },
+                      },
+                    },
+                  },
+                  characterMentions: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        name: { type: Type.STRING },
+                        role: { type: Type.STRING },
+                        relationships: {
+                          type: Type.ARRAY,
+                          items: {
+                            type: Type.OBJECT,
+                            properties: {
+                              with: { type: Type.STRING },
+                              note: { type: Type.STRING },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
                 },
                 required: ['chapterNumber', 'title', 'summary', 'keyTakeaways'],
               },
@@ -115,6 +170,9 @@ ${contextInstruction}
 
         // 🔁 retry si quota temporaire
         if ((is429 || is503) && retries > 1) {
+          console.warn(
+            `⚠️ Gemini overload sur chapitre ${currentIndex}. ${error}`,
+          )
           console.warn(
             `⚠️ Rate limit/surcharge sur bloc ${currentIndex}. Retry dans ${retryDelay / 1000}s (${retries - 1} essais restants)`,
           )

@@ -209,10 +209,11 @@ CRITICAL RULES:
 3. CONSISTENCY: Always use the exact same spelling for a character.
 4. If no specific named character relationships are described, return an empty array [].
 5. COMPLETENESS: Consider ALL characters listed in the context above — do not overlook characters who appear briefly.
+6. LANGUAGE: Write the 'context' field in French. The 'relationshipType' field MUST stay one of the English enum values listed in the schema (ally, enemy, family, rival, mentor, romantic, neutral) — do NOT translate it.
 
 EXAMPLES:
 BAD: { "source": "Prince Calder", "target": "allies", "relationshipType": "ally", "context": "..." }
-GOOD: { "source": "Calder", "target": "Kael", "relationshipType": "ally", "context": "..." }`
+GOOD: { "source": "Calder", "target": "Kael", "relationshipType": "ally", "context": "Calder et Kael combattent côte à côte lors de la bataille." }`
 
   let retries = 10
   let retryDelay = 15000
@@ -352,6 +353,8 @@ Structure it as:
 2. Key relationships (characters they interact with in these chapters)
 3. Notable events (what has happened to/with them up to chapter ${upToChapter})
 ${portraitInstruction}
+
+LANGUAGE: Write the entire biography in French. Keep character names as they appear in the source text.
 
 CRITICAL RULE: Do NOT include, reference, or imply ANY events after Chapter ${upToChapter}. This profile must be completely spoiler-free.${hasAppearance ? '\nFor the Portrait section: only include traits explicitly provided in the appearance data above. Do NOT invent or guess any physical details.' : ''}`
 

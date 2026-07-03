@@ -53,6 +53,8 @@ You are an expert literary analyst.
 
 Your mission is to identify story chapters and produce detailed, structured summaries faithful to the text.
 
+🇫🇷 LANGUAGE: Write ALL output text in French (title, summary, keyTakeaways, characterDetails, characterMentions.role, relationships.note), regardless of the language of the source text. Only character names must stay as they appear in the source text.
+
 ${contextInstruction}
 
 📌 Rules:

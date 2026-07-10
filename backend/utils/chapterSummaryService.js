@@ -59,16 +59,22 @@ ${contextInstruction}
 
 📌 Rules:
 - Only include chapters containing real narrative content (story, dialogue, action, scene description).
+- A section labeled "Prologue", "Introduction", or "Foreword" IS a valid chapter if it contains a scene, dialogue, or story action — judge it by its content, not its label.
 - Never merge two chapters together.
 - Ignore duplicates.
 
-🚫 COMPLETELY IGNORE and do NOT include in your response:
+🚫 COMPLETELY IGNORE and do NOT include in your response (unless it contains real narrative content, e.g. a narrative-driven prologue):
 - Character lists, glossaries, name indexes
 - Tables of contents
 - Tables, structured lists, appendices
 - Prefaces, author's notes, warnings, acknowledgements
+- Prologues, introductions, and forewords that are purely expository or authorial (no scene, dialogue, or story action)
 - Title pages, dedications, epigraphs
 - Anything that is not a narrative chapter telling an actual story
+
+Examples:
+- EXCLUDE: A "Prologue" where the author explains how they came to write the book, or gives historical/background context — no scene, no characters acting.
+- INCLUDE: A "Prologue" that opens with a scene — a character doing or saying something, even in flashback or from a different point of view.
 
 📊 For EACH narrative chapter return a JSON object with:
 
@@ -253,7 +259,21 @@ ${contextInstruction}
     }
   }
 
-  console.log(`✅ Terminé : ${finalChapters.length} chapitres détectés`)
+  // 🔢 Renumérotation séquentielle finale : le numéro persisté est assigné par
+  // le pipeline (1..N, dans l'ordre de détection), pas par le modèle. Cela
+  // garantit l'absence de doublons/redémarrages même si le texte source (ou
+  // le modèle) recommence à "Chapitre 1" en cours de document.
+  const renumberedChapters = finalChapters.map((chap, index) => {
+    const assignedNumber = index + 1
+    if (chap.chapterNumber !== assignedNumber) {
+      console.log(
+        `🔢 Renumbering "${chap.title}": model said chapter ${chap.chapterNumber} → assigned chapter ${assignedNumber}`,
+      )
+    }
+    return { ...chap, chapterNumber: assignedNumber }
+  })
 
-  return finalChapters
+  console.log(`✅ Terminé : ${renumberedChapters.length} chapitres détectés`)
+
+  return renumberedChapters
 }

@@ -5,7 +5,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.0-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-[![Python / Node.js](https://img.shields.io/badge/Backend-Python%20%2F%20Node.js-blueviolet?style=for-the-badge&logo=python)](https://python.org/)
+[![Node.js](https://img.shields.io/badge/Backend-Python%20%2F%20Node.js-blueviolet?style=for-the-badge&logo=python)](https://nodejs.org/)
 
 ---
 
@@ -51,7 +51,7 @@ As a modern Software Engineer, I leverage advanced methodologies and AI-driven w
 - 🎨 **Tailwind CSS** for responsive utility-based styling
 - 🧩 **shadcn/ui** for accessible and customizable UI components
 - 🧠 **LLM & Vector Integration** for intelligent documentation search and retrieval
-- 🐍 **Python / Node.js** for backend processing, embeddings, and API endpoints
+- 🐍 **Node.js** for backend processing, embeddings, and API endpoints
 
 ---
 
